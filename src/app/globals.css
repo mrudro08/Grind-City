@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@theme {
+  --color-orange: #ff6a13;
+  --color-orange-light: #ffa672;
+  --color-ink: #0a0a0a;
+  --color-coal: #0b0b0b;
+  --color-char: #141414;
+  --color-graphite: #151515;
+  --color-bone: #f4f2ee;
+  --color-smoke: #3a3a3a;
+  --color-ash: #6a6a6a;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --breakpoint-3xl: 1920px;
+}
+
+:root {
+  color-scheme: dark;
+  --cut: 24px;
+}
+
+html { scroll-behavior: smooth; }
+html.lenis { scroll-behavior: auto; }
+body { background: var(--color-coal); color: #fff; font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+
+@layer components {
+/* Corner-cut shapes: top-left + bottom-right chamfer */
+.cut { clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut)); }
+.cut-sm { --cut: 12px; clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut)); }
+.cut-lg { --cut: 36px; clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut)); }
+.cut-xs { --cut: 8px; clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut)); }
+
+/* Outlined cut shape: wrapper paints the stroke colour, inner paints the fill */
+.cut-outline { position: relative; }
+.cut-outline > .cut-inner { position: absolute; inset: 1.5px; }
+
+/* Display type */
+.display { font-weight: 900; font-style: italic; letter-spacing: -0.03em; line-height: 0.96; text-transform: uppercase; }
+.eyebrow { font-weight: 700; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; }
+.label { font-weight: 700; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* Slanted stripe parallelogram */
+.slant { clip-path: polygon(38% 0, 100% 0, 62% 100%, 0 100%); }
+
+/* Patterns */
+.pat-dots { background-image: radial-gradient(currentColor 1.25px, transparent 1.25px); background-size: 22px 22px; }
+.pat-stripes { background-image: repeating-linear-gradient(-60deg, currentColor 0 2px, transparent 2px 28px); }
+.pat-iso {
+  background-image:
+    linear-gradient(30deg, currentColor 0 1px, transparent 1px 100%),
+    linear-gradient(-30deg, currentColor 0 1px, transparent 1px 100%);
+  background-size: 56px 32px;
+}
+.fade-r { mask-image: linear-gradient(to right, black, transparent); -webkit-mask-image: linear-gradient(to right, black, transparent); }
+.fade-l { mask-image: linear-gradient(to left, black, transparent); -webkit-mask-image: linear-gradient(to left, black, transparent); }
+.fade-b { mask-image: linear-gradient(to bottom, black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent); }
+
+}
+
+/* Motion defaults: content visible before JS; GSAP animates from these */
+[data-reveal] { will-change: transform, opacity, filter; }
+.split-line { display: block; overflow: hidden; }
+.split-line > span { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+html.is-loading { overflow: hidden; }
+
+/* Hover lift for cards */
+@layer components {
+  .lift { transition: transform .5s cubic-bezier(.22,1,.36,1), box-shadow .5s; }
+  @media (hover:hover) { .lift:hover { transform: translateY(-6px); } }
+}
+
+/* Hide native select arrow on Safari */
+select { background-image: none; }
+
+/* Chamfered stroke overlay: a hollow corner-cut frame (works over photos / transparent fills).
+   Use together with a .cut* class that sets --cut and the outer clip-path. */
+.cut-stroke {
+  --sw: 1.5px;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  padding: var(--sw);
+  mask-image:
+    linear-gradient(to bottom right, #000 50%, transparent 50%),
+    linear-gradient(to top left, #000 50%, transparent 50%),
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0);
+  mask-size:
+    calc(var(--cut) + var(--sw) * 2) calc(var(--cut) + var(--sw) * 2),
+    calc(var(--cut) + var(--sw) * 2) calc(var(--cut) + var(--sw) * 2),
+    100% 100%,
+    100% 100%;
+  mask-position: 0 0, 100% 100%, 0 0, 0 0;
+  mask-repeat: no-repeat;
+  mask-clip: border-box, border-box, padding-box, border-box;
+  mask-composite: add, add, exclude, add;
+}
+
+/* Form feedback */
+@keyframes field-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+.field-shake { animation: field-shake 0.4s cubic-bezier(.36,.07,.19,.97); }
+
+@keyframes btn-shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.btn-shimmer { animation: btn-shimmer 1.1s ease-in-out infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { animation: spin 0.8s linear infinite; }
+
+/* Lenis smooth scroll */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .field-shake, .btn-shimmer, .spinner, .lift { animation: none !important; transition: none !important; }
+}
